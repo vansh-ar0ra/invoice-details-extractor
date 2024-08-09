@@ -1,6 +1,8 @@
 # Invoice Details Extractor
 
 This repository contains a Python script - invoice_details_extractor.py designed to extract invoice details from PDF files. The script can be run as a command line tool, allowing users to specify the source PDF file and optionally, the destination for the extracted data.
+In addition to the command-line tool, this repository includes a Streamlit application that demonstrates the usage of the Invoice Details extractor. You can access the live demo at [this link](https://vansh-swipe-invoice-extractor.streamlit.app/).
+
 
 ## Objective
 
@@ -40,6 +42,12 @@ pip install -r requirements.txt
 
 Make sure to update requirements.txt with any necessary libraries that your script requires, such as PyPDF2 or any other package you use for PDF extraction.
 
+
+### 4. Add MISTRAL_API_KEY to environmental variables
+
+```bash
+export MISTRAL_API_KEY=<your-mistral-api-key>
+```
 
 ## Usage
 The script can be run directly from the command line. Below is the basic usage:
