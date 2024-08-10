@@ -3,6 +3,9 @@
 This repository contains a Python script - invoice_details_extractor.py designed to extract invoice details from PDF files. The script can be run as a command line tool, allowing users to specify the source PDF file and optionally, the destination for the extracted data.
 In addition to the command-line tool, this repository includes a Streamlit application that demonstrates the usage of the Invoice Details extractor. You can access the live demo at [this link](https://vansh-swipe-invoice-extractor.streamlit.app/).
 
+Supported File Types:
+.pdf, .doc, .docx, .md, .txt, .ppt, .pptx, .rtf, .rst, .xml, .png, .jpg, .jpeg, .tiff, .bmp, .heic, and more
+
 
 ## Objective
 
@@ -66,13 +69,13 @@ destination (optional): Output file path to store extracted details. If not prov
 Extracting data from invoice.pdf and saving it to invoice-details.json:
 
 ```bash
-python invoice_extractor.py /path/to/invoice.pdf /path/to/output/invoice-details.json
+python invoice_details_extractor.py /path/to/invoice.pdf /path/to/output/invoice-details.json
 ```
 
 If no destination is provided, it will default to the current directory:
 
 ```bash
-python invoice_extractor.py /path/to/invoice.pdf
+python invoice_details_extractor.py /path/to/invoice.pdf
 ```
 
 This will save the extracted data to invoice-extracted.json in the current directory.

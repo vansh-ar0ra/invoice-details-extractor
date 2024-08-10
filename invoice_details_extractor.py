@@ -1,11 +1,12 @@
 import argparse
 import json
 import os
+import asyncio
 from mistralai import Mistral
-from langchain_community.document_loaders import UnstructuredPDFLoader
+from unstructured.partition.auto import partition
 
 
-def get_model_completion(mistral_api_key, user_prompt, system_prompt ='', json_mode=False, retries=3):
+async def get_model_completion(mistral_api_key, user_prompt, system_prompt ='', json_mode=False, retries=3):
 
     try:
         api_key = os.environ["MISTRAL_API_KEY"]
@@ -63,33 +64,29 @@ def get_model_completion(mistral_api_key, user_prompt, system_prompt ='', json_m
         print('Error in getting response from LLM: ', e)
 
 
-def read_pdf(file_path):
+async def read_content(file_path):
     try: 
-        loader = UnstructuredPDFLoader(file_path)
-        data = loader.load()
-        if data:
-            document =  data[0]
-            page_content = document.page_content
-            if (page_content): 
-                return page_content
-            else: 
-                return ''
-        else: 
-            return ''
+        elements = partition(filename=file_path)
+        
+        text = ''
+        for element in elements:
+            text += element.text + ' '
+
+        return text
         
     except Exception as e:
         print('Error in reading data from pdf: ', e)
         return ''
+    
 
-
-def extract_details_from_invoice(file_path, mistral_api_key=''): 
+async def extract_details_from_invoice(file_path, mistral_api_key=''): 
 
     if (not mistral_api_key): 
         mistral_api_key = os.environ["MISTRAL_API_KEY"]
 
     print('> Reading Uploaded File')
 
-    invoice_content = read_pdf(file_path)
+    invoice_content = await read_content(file_path)
     print('> Invoice Content Read!')
     
     system_prompt = """
@@ -123,10 +120,9 @@ def extract_details_from_invoice(file_path, mistral_api_key=''):
 
     print('> Calling LLM for extracting details')
 
-    response = get_model_completion(mistral_api_key=mistral_api_key, user_prompt=user_prompt, system_prompt=system_prompt, json_mode=True)
+    response = await get_model_completion(mistral_api_key=mistral_api_key, user_prompt=user_prompt, system_prompt=system_prompt, json_mode=True)
 
     try:
-        print(response)
         invoice_details = json.loads(response)
         print(invoice_details)
         return invoice_details
@@ -139,36 +135,40 @@ def save_extracted_data(data, output_path):
         json.dump(data, f, indent=4)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Extract invoice details from a PDF file.")
-    
-    parser.add_argument(
-        'source', 
-        type=str, 
-        help="Path to the PDF file from which to extract invoice details."
-    )
-    
-    parser.add_argument(
-        'destination', 
-        type=str, 
-        nargs='?',
-        help="Output file path to store extracted details (optional). Defaults to '<file_name>-extracted.json' in the current directory."
-    )
-    
-    args = parser.parse_args()
+async def main():
+    try: 
+        parser = argparse.ArgumentParser(description="Extract invoice details from a PDF file.")
+        
+        parser.add_argument(
+            'source', 
+            type=str, 
+            help="Path to the PDF file from which to extract invoice details."
+        )
+        
+        parser.add_argument(
+            'destination', 
+            type=str, 
+            nargs='?',
+            help="Output file path to store extracted details (optional). Defaults to '<file_name>-extracted.json' in the current directory."
+        )
+        
+        args = parser.parse_args()
 
-    if not os.path.isfile(args.source):
-        print(f"Error: The file '{args.source}' does not exist.")
-        exit(1)
-    
-    file_name = os.path.splitext(os.path.basename(args.source))[0]
-    default_output_path = f'{file_name}-extracted.json'
-    output_path = args.destination if args.destination else default_output_path
+        if not os.path.isfile(args.source):
+            print(f"Error: The file '{args.source}' does not exist.")
+            exit(1)
+        
+        file_name = os.path.splitext(os.path.basename(args.source))[0]
+        default_output_path = f'{file_name}-extracted.json'
+        output_path = args.destination if args.destination else default_output_path
 
-    extracted_data = extract_details_from_invoice(args.source)
-    save_extracted_data(extracted_data, output_path)
+        extracted_data = await extract_details_from_invoice(args.source)
+        save_extracted_data(extracted_data, output_path)
 
-    print(f"Invoice details extracted to '{output_path}'.")
+        print(f"> Invoice details extracted to '{output_path}'.")
+
+    except Exception as e:
+        print('Error: ', e)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
