@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import os
+import asyncio
 from invoice_details_extractor import extract_details_from_invoice
 
 def display_product_table(products):
@@ -25,7 +26,8 @@ def display_product_table(products):
 # UI Layout
 st.set_page_config(layout="wide")
 st.title("Invoice Details Extractor")
-st.markdown("##### Upload your Invoice on the File Uploader on the left. Click on Extract Details from Invoice button to fill the fields on the left using AI.")
+st.markdown("##### Upload your Invoice on the File Uploader on the left. Click on Extract Details from Invoice button to fill the fields on the right using AI.")
+st.markdown("###### Note: This application doesn't store any data. All the extracted data is stored in the session state. You can reset the application by clicking on the Reset button.")
 
 reset_button_placeholder = st.empty()
 with reset_button_placeholder.container():
@@ -49,7 +51,7 @@ left_column, right_column = st.columns(2)
 with left_column:
     st.write("") 
     st.markdown("#### ← Please add the API key using the left sidebar before uploading the file.")
-    uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
+    uploaded_file = st.file_uploader("Upload a file", type=None)
 
     if uploaded_file is not None:
         st.session_state.details = None
@@ -82,7 +84,7 @@ with right_column:
             st.info("Processing the uploaded file...")
 
         start_time = time.time()
-        details = extract_details_from_invoice("temp.pdf", mistral_api_key)
+        details = asyncio.run(extract_details_from_invoice("temp.pdf", mistral_api_key))
 
         while time.time() - start_time < 10:
             if details:

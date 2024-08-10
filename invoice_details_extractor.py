@@ -9,10 +9,9 @@ from unstructured.partition.auto import partition
 async def get_model_completion(mistral_api_key, user_prompt, system_prompt ='', json_mode=False, retries=3):
 
     try:
-        api_key = os.environ["MISTRAL_API_KEY"]
         model = "mistral-large-latest"
 
-        client = Mistral(api_key=api_key)
+        client = Mistral(api_key=mistral_api_key)
         
         messages = [
             {
