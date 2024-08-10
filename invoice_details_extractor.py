@@ -113,6 +113,9 @@ async def extract_details_from_invoice(file_path, mistral_api_key=''):
     "currency": string
   }
 }
+
+
+If nothing is provided in the invoice, simply return \{\}.
     """
 
     user_prompt = invoice_content
