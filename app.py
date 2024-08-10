@@ -36,8 +36,8 @@ with reset_button_placeholder.container():
         if st.button("Reset"):
             st.session_state.uploaded_file = None
             uploaded_file = None
-            if os.path.exists("temp.pdf"):
-                os.remove("temp.pdf")
+            if os.path.exists("/tmp/temp.pdf"):
+                os.remove("/tmp/temp.pdf")
             st.session_state.details = None  # Clear the extracted details
 
 
@@ -76,7 +76,7 @@ with right_column:
             st.info("Please add your Mistral API key to continue.")
             st.stop()
 
-        with open("temp.pdf", "wb") as f:
+        with open("/tmp/temp.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())
 
         # Display loading message in the right column while processing
@@ -84,7 +84,7 @@ with right_column:
             st.info("Processing the uploaded file...")
 
         start_time = time.time()
-        details = asyncio.run(extract_details_from_invoice("temp.pdf", mistral_api_key))
+        details = asyncio.run(extract_details_from_invoice("/tmp/temp.pdf", mistral_api_key))
 
         while time.time() - start_time < 10:
             if details:
